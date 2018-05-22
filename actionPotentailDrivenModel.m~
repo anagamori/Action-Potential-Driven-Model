@@ -28,7 +28,6 @@ phi_1 = 0.03; % [mm-1]
 phi_2 = 1.23; 
 phi_3 = 0.01; % [mm-1]
 phi_4 = 1.08; % 
-
 %--------------------------------------------------------------------------
 % Initial condition
 Ca_SR = 2.5/1000; % [mM]
@@ -70,8 +69,6 @@ c_0 = -7.4;
 d_0 = 30.3;
 
 X_m = -8;
-X_CE = -8;
-F = 0;
 %--------------------------------------------------------------------------
 FR = 1;
 time = 0:1/Fs:5;
@@ -100,8 +97,6 @@ Ca_SPT_vec = zeros(1,length(time));
 A_vec = zeros(1,length(time));
 A_tilda_vec = zeros(1,length(time));
 
-F_vec = zeros(1,length(time));
-
 for t = 1:length(time)
     if spikeTrain(t) == 1
         spikeTrain_temp(t) = 1;
@@ -111,8 +106,6 @@ for t = 1:length(time)
         
         spikeTrain_temp_2 = zeros(1,length(time));
     end
-    
-   
     R = Ca_SR*R_max*diffusion1_conv(t)*diffusion2_conv(t); % equation 3
     U = U_max*(Ca_SP^2*K^2/(1+Ca_SP*K+Ca_SP^2*K^2))^2; % equation 4
     
@@ -153,16 +146,9 @@ for t = 1:length(time)
     R_vec(t) = R;
     U_vec(t) = U;
     
-    g = exp(-((X_m-g_1)/g_2)^2);
-    if F <= P_0*g*A
-        X_CE_dot = -b_0*(P_0*g*A-F)/(F+a_0*g*A);
-    else
-        X_CE_dot = -d_0*(P_0*g*A-F)/(2*P_0*g*A-F+c_0*g*A);
-    end
-    X_CE = X_CE_dot/Fs + X_CE;
-    F = P_0*K_SE*(X_m-X_CE);
+    g = exp(-((X_m-g1)/g_2)^2);
+    X_CE_dot = -b_0*(P_0*g*A-F)/(2*P_0*g*A-F+c_0*g*A);
     
-    F_vec(t) = F;
 end
 
 figure(1)
@@ -172,12 +158,11 @@ subplot(2,1,2)
 plot(time,Ca_SP_vec)
 
 figure(2)
-%subplot(2,1,1)
+subplot(2,1,1)
 plot(time,A_vec)
-% subplot(2,1,2)
-% plot(time,F_vec)
-% ylim([0 10])
-
+subplot(2,1,2)
+plot(time,A_vec*23)
+ylim([0 10])
 function spikeTrain = spikeTrainGenerator(t,Fs,freq)
 
 spikeTrain = zeros(1,length(t));
